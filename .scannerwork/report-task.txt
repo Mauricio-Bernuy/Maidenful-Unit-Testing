@@ -1,0 +1,7 @@
+organization=mauricio-bernuy
+projectKey=Mauricio-Bernuy_Maidenful-Unit-Testing
+serverUrl=https://sonarcloud.io
+serverVersion=8.0.0.29375
+dashboardUrl=https://sonarcloud.io/dashboard?id=Mauricio-Bernuy_Maidenful-Unit-Testing
+ceTaskId=AYEeAyh-3_8fOT9u1VdS
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AYEeAyh-3_8fOT9u1VdS

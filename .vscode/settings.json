@@ -47,6 +47,11 @@
         "sstream": "cpp",
         "stdexcept": "cpp",
         "streambuf": "cpp",
-        "typeinfo": "cpp"
-    }
+        "typeinfo": "cpp",
+        "complex": "cpp",
+        "cinttypes": "cpp"
+    },
+    "gcovViewer.buildDirectories": [
+        "c:\\Users\\mauri\\source\\repos\\Software\\Maidenful-Unit-Testing"
+    ]
 }

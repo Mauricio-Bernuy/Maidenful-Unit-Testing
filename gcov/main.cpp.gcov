@@ -1,0 +1,235 @@
+        -:    0:Source:main.cpp
+        -:    0:Graph:main.gcno
+        -:    0:Data:main.gcda
+        -:    0:Runs:1
+        -:    1:#include <iostream>
+        -:    2:#include <string>
+        -:    3:#include <sstream>
+        -:    4:#include <exception>
+        -:    5:#include <vector>
+        -:    6:#include <utility>
+        -:    7:
+        -:    8:struct fecha{
+        -:    9:    int dia = 0;
+        -:   10:    int mes = 0;
+        -:   11:    int año = 0;
+        -:   12:};
+        -:   13:
+        -:   14:struct DateFormatException : public std::exception
+        -:   15:{
+        5:   16:	const char * what () const throw () override
+        -:   17:    {
+        5:   18:    	return "Bad date formatting.";
+        -:   19:    }
+        -:   20:};
+        -:   21:
+        -:   22:struct DateException : public std::exception
+        -:   23:{
+        4:   24:	const char * what () const throw () override
+        -:   25:    {
+        4:   26:    	return "Query date before birth date.";
+        -:   27:    }
+        -:   28:};
+        -:   29:
+       28:   30:bool CorrectDateFormat(fecha _fecha){
+       28:   31:    bool valid_day = false;
+       28:   32:    bool valid_month = false;
+       28:   33:    bool valid_year = false;
+        -:   34:    
+      28*:   35:    if ((_fecha.mes >= 1) || (_fecha.mes <= 12))
+        -:   36:    {
+       28:   37:        valid_month = true;
+        -:   38:    }
+        -:   39:
+      28*:   40:    if ((_fecha.mes == 2) && (_fecha.año % 4 == 0) && (_fecha.dia<=29 || _fecha.dia>=1))
+        -:   41:    {
+        3:   42:        valid_day = true; 
+        -:   43:    }
+      25*:   44:    else if ((_fecha.mes == 2) && (_fecha.año % 4 != 0) && (_fecha.dia<=28 || _fecha.dia>=1) )
+        -:   45:    {
+        2:   46:        valid_day = true; 
+        -:   47:    }
+        -:   48:
+       28:   49:    if ((_fecha.mes == 1 || _fecha.mes == 3 || _fecha.mes == 5 || _fecha.mes == 7 ||
+       28:   50:        _fecha.mes == 8 || _fecha.mes == 10 || _fecha.mes == 12) && ( _fecha.dia<=31 || _fecha.dia>=1) )
+        -:   51:    {
+       20:   52:        valid_day = true; 
+        -:   53:    }
+       8*:   54:    else if ((_fecha.mes == 4 || _fecha.mes == 6 || _fecha.mes == 9 || _fecha.mes == 11) && (_fecha.dia<=30 || _fecha.dia>=1) )
+        -:   55:    {
+        2:   56:        valid_day = true; 
+        -:   57:    }
+        -:   58:    
+        -:   59:
+       28:   60:    if ((_fecha.año >= 999) || (_fecha.año <= 10000))
+        -:   61:    {
+       28:   62:        valid_year = true;
+        -:   63:    }
+        -:   64:
+       28:   65:    return (valid_day && valid_month && valid_year);
+        -:   66:}
+        -:   67:
+       13:   68:bool QueryDateValidation(fecha nacimiento, fecha consulta ){
+       13:   69:    if (consulta.año < nacimiento.año){
+        2:   70:        return false;
+       11:   71:    }else if (consulta.mes < nacimiento.mes && consulta.año == nacimiento.año){
+        1:   72:        return false;
+       10:   73:    }else if (consulta.dia < nacimiento.dia && consulta.año == nacimiento.año && consulta.mes == nacimiento.mes){
+        1:   74:        return false;
+        -:   75:    }
+        9:   76:    return true;
+        -:   77:}
+        -:   78:
+       13:   79:bool CheckAdultAge(fecha nacimiento, fecha consulta) {
+       13:   80:    if (!QueryDateValidation(nacimiento, consulta))
+        4:   81:        throw DateException();
+        -:   82:
+        9:   83:    int edadAnios = consulta.año - nacimiento.año;
+        9:   84:    if(edadAnios == 18) { 
+        6:   85:        if(consulta.mes == nacimiento.mes) {
+        4:   86:            if(consulta.dia >= nacimiento.dia) {
+        2:   87:                return true;
+        -:   88:            }
+        -:   89:            else {
+        2:   90:                return false;
+        -:   91:            }
+        -:   92:        }
+        2:   93:        else if(consulta.mes > nacimiento.mes) {
+        1:   94:            return true;
+        -:   95:        }
+        -:   96:        else {
+        1:   97:            return false;
+        -:   98:        }
+        -:   99:    }
+        3:  100:    else if(edadAnios > 18) {
+        1:  101:        return true;
+        -:  102:    }
+        -:  103:    else {
+        2:  104:        return false;
+        -:  105:    }
+        -:  106:}
+        -:  107:
+       32:  108:fecha DateParser(std::string input){
+       32:  109:    size_t pos = 0;
+       64:  110:    std::string delimiter = "/";
+        -:  111:    
+       32:  112:    pos = input.find(delimiter);
+       32:  113:    if (pos == std::string::npos)
+        1:  114:        throw DateFormatException();
+        -:  115:
+       62:  116:    std::string dia_s = input.substr(0, pos);
+       31:  117:    input.erase(0, pos + delimiter.length());
+        -:  118:
+       31:  119:    pos = input.find(delimiter);
+       31:  120:    if (pos == std::string::npos)
+        1:  121:        throw DateFormatException();
+        -:  122:
+       60:  123:    std::string mes_s = input.substr(0, pos);
+       30:  124:    input.erase(0, pos + delimiter.length());
+        -:  125:    
+       30:  126:    pos = input.find(delimiter);
+        -:  127:        
+       60:  128:    std::string año_s = input.substr(0, pos);
+       30:  129:    input.erase(0, pos + delimiter.length());
+        -:  130:
+       30:  131:    if (dia_s.empty() || mes_s.empty() || año_s.empty())
+        1:  132:        throw DateFormatException();
+        -:  133:
+       29:  134:    int dia = 0;
+       29:  135:    int mes = 0;
+       29:  136:    int año = 0;
+        -:  137:    
+        -:  138:    try{
+       29:  139:        dia = stoi(dia_s);
+       28:  140:        mes = stoi(mes_s);
+       28:  141:        año = stoi(año_s);
+        -:  142:    }
+        2:  143:    catch(...) {
+        1:  144:        throw DateFormatException();
+        -:  145:    }   
+        -:  146:
+       28:  147:    fecha date = {dia,mes,año};
+        -:  148:    
+       28:  149:    if (!CorrectDateFormat(date)){
+        1:  150:        date.dia = 0; date.mes = 0; date.año = 0;
+        1:  151:        throw DateFormatException();
+        -:  152:    }
+        -:  153:    
+       54:  154:    return date;  
+        -:  155:
+        -:  156:}
+        -:  157:
+        1:  158:int main(int argc, char *argv[]){
+        2:  159:    std::string TESTING = "-t";
+        1:  160:    if (argc > 1){
+        1:  161:        if (!TESTING.compare(argv[1])){
+        -:  162:            // run coverage tests
+        1:  163:            std::cout << "Running Tests:\n";
+        -:  164:
+        -:  165:            std::vector<std::pair<std::string,std::string>> tests = {
+        -:  166:                {"21/09/1997", "31/05/2022"},   // Valid Age
+        -:  167:                {"29/02/2020", "28/02/2021"},   // Invalid Age 
+        -:  168:                {"29/02/2020", "28/02/2021"},   // Invalid Age
+        -:  169:                {"01/03/2000", "01/03/2018"},   // Valid Age, Same Date
+        -:  170:                {"01/02/2000", "01/03/2018"},   // Valid Age, Larger Month
+        -:  171:                {"01/04/2000", "01/03/2018"},   // Invalid Age, Smaller Month
+        -:  172:                {"01/03/2000", "02/03/2018"},   // Valid Age, Larger Day
+        -:  173:                {"02/03/2000", "01/03/2018"},   // Invalid Age, Smaller Day
+        -:  174:                {"31/12/1999", "31/12/1998"},   // Date Exception, Year
+        -:  175:                {"31/12/1999", "01/01/1999"},   // Date Exception, Month
+        -:  176:                {"31/12/9999", "30/12/9999"},   // Date Exception, Day
+        -:  177:                {"33/01/1980", "24/01/1998"},   // Date Format Exception, Day
+        -:  178:                {"01/24/1980", "24/01/1998"},   // Date Format Exception, Month
+        -:  179:                {"12/01/1980", "24/01/0001"},   // Date Format Exception, Year
+        -:  180:                {"/", "/"},                     // Date Format Exception, Wrong Characters 1
+        -:  181:                {"//", "//"},                   // Date Format Exception, Wrong Characters 2
+        -:  182:                {"", ""},                       // Date Format Exception, Wrong Characters 3
+        -:  183:                {"a/b/c", "c/d/e"},             // Date Format Exception, Wrong Characters 4
+        -:  184:
+       20:  185:            };
+        -:  186:            
+       19:  187:            for (auto test : tests){
+        -:  188:                try{
+       18:  189:                    std::cout << "nac: " << std::get<0>(test) << '\n';
+       18:  190:                    std::cout << "con: " << std::get<1>(test)  << '\n';
+       32:  191:                    auto result = CheckAdultAge(DateParser(std::get<0>(test)), DateParser(std::get<1>(test)));
+        9:  192:                    std::cout << "result: " << result << '\n';
+        -:  193:                }
+       18:  194:                catch(const std::exception& e){
+        9:  195:                    std::cerr << "Exception: " << e.what() << "\n";
+        -:  196:                }
+        -:  197:            }
+        -:  198:
+        1:  199:            std::cout << "Tests Finished\n";
+        1:  200:            return 0;
+        -:  201:        }
+    #####:  202:        std::cerr << "Wrong argument";
+    #####:  203:        return 1;
+        -:  204:    }
+        -:  205:    else{
+        -:  206:        // run program as normal
+    #####:  207:        std::string nac_input;
+    #####:  208:        std::cout << "Ingresar fecha de Nacimiento con el formato DD/MM/AAAA: " << std::endl;
+    #####:  209:        std::cin >> nac_input;
+        -:  210:
+    #####:  211:        std::string con_input;
+    #####:  212:        std::cout << "Ingresar fecha de Consulta con el formato DD/MM/AAAA: " << std::endl;
+    #####:  213:        std::cin >> con_input;
+        -:  214:
+        -:  215:        try{
+    #####:  216:            fecha nac = DateParser(nac_input);
+    #####:  217:            fecha con = DateParser(con_input);
+        -:  218:
+    #####:  219:            if (CheckAdultAge(nac,con))
+    #####:  220:                std::cout << "Edad Válida, mayor a 18 años.\n";
+        -:  221:            else 
+    #####:  222:                std::cout << "Edad no Válida, menor a 18 años.\n";
+    #####:  223:            return 0;
+        -:  224:        }
+    =====:  225:        catch(const std::exception& e){
+    =====:  226:            std::cerr << "Exception: " << e.what() << "\n";
+    =====:  227:            return 1;
+        -:  228:        }
+        -:  229:    }
+        -:  230:
+        -:  231:}
