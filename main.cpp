@@ -27,43 +27,79 @@ struct DateException : public std::exception
     }
 };
 
-bool CorrectDateFormat(fecha _fecha){
-    bool valid_day = false;
-    bool valid_month = false;
-    bool valid_year = false;
+// bool CorrectDateFormat(fecha _fecha){
+//     bool valid_day = false;
+//     bool valid_month = false;
+//     bool valid_year = false;
     
-    if ((_fecha.mes >= 1) || (_fecha.mes <= 12))
-    {
-        valid_month = true;
-    }
+//     if ((_fecha.mes >= 1) || (_fecha.mes <= 12))
+//     {
+//         valid_month = true;
+//     }
 
-    if ((_fecha.mes == 2) && (_fecha.año % 4 == 0) && (_fecha.dia<=29 || _fecha.dia>=1))
-    {
-        valid_day = true; 
-    }
-    else if ((_fecha.mes == 2) && (_fecha.año % 4 != 0) && (_fecha.dia<=28 || _fecha.dia>=1) )
-    {
-        valid_day = true; 
-    }
+//     if ((_fecha.mes == 2) && (_fecha.año % 4 == 0) && (_fecha.dia<=29 && _fecha.dia>=1))
+//     {
+//         valid_day = true; 
+//     }
+//     else if ((_fecha.mes == 2) && (_fecha.año % 4 != 0) && (_fecha.dia<=28 && _fecha.dia>=1) )
+//     {
+//         valid_day = true; 
+//     }
 
-    if ((_fecha.mes == 1 || _fecha.mes == 3 || _fecha.mes == 5 || _fecha.mes == 7 ||
-        _fecha.mes == 8 || _fecha.mes == 10 || _fecha.mes == 12) && ( _fecha.dia<=31 || _fecha.dia>=1) )
-    {
-        valid_day = true; 
-    }
-    else if ((_fecha.mes == 4 || _fecha.mes == 6 || _fecha.mes == 9 || _fecha.mes == 11) && (_fecha.dia<=30 || _fecha.dia>=1) )
-    {
-        valid_day = true; 
-    }
+//     if ((_fecha.mes == 1 || _fecha.mes == 3 || _fecha.mes == 5 || _fecha.mes == 7 ||
+//         _fecha.mes == 8 || _fecha.mes == 10 || _fecha.mes == 12) && ( _fecha.dia<=31 && _fecha.dia>=1) )
+//     {
+//         valid_day = true; 
+//     }
+//     else if ((_fecha.mes == 4 || _fecha.mes == 6 || _fecha.mes == 9 || _fecha.mes == 11) && (_fecha.dia<=30 && _fecha.dia>=1) )
+//     {
+//         valid_day = true; 
+//     }
     
 
-    if ((_fecha.año >= 999) || (_fecha.año <= 10000))
-    {
-        valid_year = true;
-    }
+//     if ((_fecha.año >= 999) || (_fecha.año <= 10000))
+//     {
+//         valid_year = true;
+//     }
 
-    return (valid_day && valid_month && valid_year);
+//     return (valid_day && valid_month && valid_year);
+// }
+
+bool esBisiesto(int year) {
+  return (((year % 4 == 0) &&
+          (year % 100 != 0)) ||
+          (year % 400 == 0));
 }
+ 
+bool CorrectDateFormat(fecha _fecha){
+    int y = _fecha.año;
+    int m = _fecha.mes;
+    int d = _fecha.dia;
+
+    // valores maximos y minimos
+    // de meses y días
+    if (m < 1 || m > 12)
+      return false;
+    if (d < 1 || d > 31)
+      return false;
+ 
+    // Caso febrero, años bisiestos
+    if (m == 2)
+    {
+        if (esBisiesto(y))
+          return (d <= 29);
+        else
+          return (d <= 28);
+    }
+ 
+    // Considerar máximo de dias de cada mes
+    if (m == 4 || m == 6 ||
+        m == 9 || m == 11)
+        return (d <= 30);
+ 
+    return true;
+}
+ 
 
 bool QueryDateValidation(fecha nacimiento, fecha consulta ){
     if (consulta.año < nacimiento.año){
@@ -181,21 +217,35 @@ int main(int argc, char *argv[]){
                 {"//", "//"},                   // Date Format Exception, Wrong Characters 2
                 {"", ""},                       // Date Format Exception, Wrong Characters 3
                 {"a/b/c", "c/d/e"},             // Date Format Exception, Wrong Characters 4
-
             };
+
+            std::vector<int> test_results = {1, 0, 0, 1, 1,0,1,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
             
+            int i = 0;
+            int passed_cnt = 0;
             for (auto test : tests){
+                int result = 0;
                 try{
-                    std::cout << "nac: " << std::get<0>(test) << '\n';
+                    std::cout << " * nac: " << std::get<0>(test) << ", ";
                     std::cout << "con: " << std::get<1>(test)  << '\n';
-                    auto result = CheckAdultAge(DateParser(std::get<0>(test)), DateParser(std::get<1>(test)));
-                    std::cout << "result: " << result << '\n';
+                    result = CheckAdultAge(DateParser(std::get<0>(test)), DateParser(std::get<1>(test)));
+                    std::cout << "-> Result: " << result << " | ";
+                    
                 }
                 catch(const std::exception& e){
-                    std::cerr << "Exception: " << e.what() << "\n";
+                    std::cerr << "-> Exception: " << e.what() << " | ";
+                    result = -1;
                 }
+                if (test_results[i] == result){
+                  ++passed_cnt;
+                  std::cout << "PASS" << '\n';
+                }
+                else
+                  std::cout << "FAIL" << '\n';
+                ++i;
             }
-
+            std::cout << "\n------------------\n-> ";
+            std::cout << passed_cnt << " / " << test_results.size() << " tests passed\n";
             std::cout << "Tests Finished\n";
             return 0;
         }
